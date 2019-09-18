@@ -1,0 +1,81 @@
+Problem
+
+    Overview
+    In a programming language of your choice, create a console application that applies a batch of changes to an input file in order to create an output file.
+    In the instructions below, we provide you with the input JSON file, which is called mixtape.json, and we tell you the types of changes your application should support. You will design the structure of the changes file and you will write write the code that processes the specified changes and outputs a new file.
+    We'll expect to interact with your application like this:
+    $ application-name <input-file> <changes-file> <output-file>
+    For example:
+    $ killer-app mixtape.json changes.json output-file.json
+
+    Project Requirements
+    Here are the basic parameters for this exercise:
+    1.	This input JSON file consists of a set of users, songs, and playlists that are part of a music service: mixtape.json.
+    2.	Your application ingests mixtape.json.
+    3.	Your application ingests a changes file, which can take whatever form you like (we use changes.json in our example, but you're free to make it text, YAML, CSV, or whatever). The changes file should include multiple changes in one file.
+    4.	Your application outputs output.json in the same structure as mixtape.json, with the changes applied. The types of changes you need to support are ennumerated below and the application should process all changes in one pass.
+    5.	Your solution includes a README that explains how to use your application.
+    6.	Your README describes what changes you would need to make in order to scale this application to handle very large input files and/or very large changes files. Just describe the changes — you don't actually need to implement a scaled-up version of the application.
+    7.	Don't worry about creating a UI, DB, server, or deployment.
+    8.	Your code should be executable on Mac or Linux.
+    The types of changes your application needs to support are:
+    1.	Add an existing song to an existing playlist.
+    2.	Add a new playlist for an existing user; the playlist should contain at least one existing song.
+    3.	Remove an existing playlist.
+
+    Project Delivery
+    Send your working code and your README, which should also include instructions for how to run your project, including instructions about any dependencies.
+
+Solution
+
+    Mixtape
+    Run Mixtape as described in the problem statement: ./mixtape.exe <input_file> <changes_file> <output_file>
+
+    Notes
+    This was built and run on a Windows box. 'go build' can be used to rebuild the exe on a mac or linux box if an issue is found.
+    All source code is included.
+    Since arrays are converted to maps for constant time lookup, the output order is not retained from the input file. This is regrettable
+    however, nothing was stated around this being unacceptable.
+
+    Changes file
+    Mixtape is currently designed to ingest only json, for both the input file (in the format specified) as well as for the changes
+    file. There is a changes.json file included with this package which showcases the format in addition to this README.
+    changes file format:
+        ```
+        {
+            "new_playlists": [
+                {
+                    "id": "10",
+                    "user_id": "1",
+                    "song_ids": [
+                        "1",
+                        "2",
+                        "3"
+                    ]
+                }
+            ],
+            "remove_playlists": ["3"],
+            "update_playlists": [
+                {
+                    "playlist_id": "2",
+                    "new_song_ids": [
+                        "38",
+                        "39",
+                        "40"
+                    ]
+                }
+            ]
+        }
+        ```
+
+    Output
+    Mixtape will print out your inputs, any warnings (skippable errors) it encounters, any errors it encounters, and/or a success message
+
+    Real-World Design Considerations
+    For ingesting or modifying with large files, one solution is the parallelization of processesing each area of storage
+    (Users, PLaylists, Songs) for ingestion as well as the three current types of modifications (Add Playlist, Update PLaylist, Remove PLaylist).
+    Additionally, each broken out worker can be duplicated in any number if using a queue/worker type setup. Some boxes queue work actions
+    while others listen/pull from the queue and execute as needed. Each box's function becomes streamlined and multiple actions can be processed
+    at the same time. THe largest concern revolves around the order of operations. We have adds, deletes and modifications and if they
+    run across the same Playlist weirdness and/or errors can occur. Some of this can be attributed to poorly formatted files but 
+    that would be the major pain point for consideration during parallelization.
